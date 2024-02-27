@@ -14,7 +14,6 @@ from channels.routing import ProtocolTypeRouter,URLRouter
 import chatapp.routing
 from channels.auth import AuthMiddlewareStack
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'chat_project.settings')
-print("come to asgi")
 application = ProtocolTypeRouter(
     {
         'http':get_asgi_application(),
