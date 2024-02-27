@@ -1,128 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    {% load static %}
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-    
-    
-</head>
-<body>
-    <div>
-      <input id="my_profile_id"type="hidden" value="{{my_profile.id}}">
-    {% for profile in all_profiles %}
-      <img src="{{ profile.profileimg.url }}" width="100px" height="150px">
-      <h1 id="{{profile.id}}" class="clickable-h1">{{profile.name}}</h1>
-    {% endfor %} 
+    <!-- Bootstrap CSS (from a CDN) -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Bootstrap JS (from a CDN) -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.bundle.min.js"></script>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" type="text/css" rel="stylesheet" />
+    <link rel="stylesheet" href="{% static 'cssfolder/home.css' %}" />
+    <script defer src="{% static 'jsfolder/home.js' %}"></script>
+  </head>
+  <body>
+    <input id="my_profile_id" type="hidden" value="{{ my_profile.id }}" />
+    <input id="my_profile" type="hidden" value="{{ my_profile }}" />
+    <div class="container">
+      <div class="messaging">
+        <div class="inbox_msg">
+          <div class="inbox_people">
+            <div class="headind_srch">
+              <div class="recent_heading">
+                <h4>Recent</h4>
+              </div>
+            </div>
+            <div class="inbox_chat">
+              {% for profile in all_profiles %}
+                <div class="chat_list">
+                  <div class="chat_people profile clickable-h1" id="{{ profile.id }}" data-profile-img="{{ profile.profileimg.url }}">
+                    <div class="chat_img">
+                      <img class="profile_img" src="{{ profile.profileimg.url }}" alt="sunil" />
+                    </div>
+                    <div class="chat_ib">
+                      <h1 id="{{ profile.id }}">{{ profile.name }}</h1>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="mesgs">
+            <div class="msg_history"></div>
+            <div class="type_msg">
+              <div class="input_msg_write">
+                <input type="text" class="write_msg" id="messageInput" placeholder="Type a message" />
+                <button class="msg_send_btn" id="sendMessageBtn" type="button"><i class="fa fa-paper-plane-o" aria-hidden="true"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-     <div id="container">
-
-     </div>
-    <input id="text" type="text" hidden>
-    <button id="Submit" hidden>Submit</button>
-  
-    
-</body>
-<script>
-  let show=document.getElementById("show");
-let tx=document.getElementById("text");
-let bt=document.getElementById("Submit")
-let my_profile_id=document.getElementById("my_profile_id").value
-let container=document.getElementById("container")
-console.log(my_profile_id)
-let Otherid;
-let ws
-
-//1st connection
-ws= new WebSocket('ws://127.0.0.1:8000/ws/ac/')
-
-//Socket connection create
-let WebSocketConnection=function(){
-  ws= new WebSocket('ws://127.0.0.1:8000/ws/ac/')
-  console.log('again connect')
-
-  ws.onopen=function(event){
-    
-  }
-  ws.onmessage=function(event){
-    data=JSON.parse(event.data)
-    console.log(event.data)
-    //show.insertAdjacentText('afterend',event.data)
-    //h2.innerText=event.data
-    container.textContent+=data["msg"]
-  }
-  ws.onerror=function(event){
-    console.log(event)
-  }
-  ws.onclose=function(event){
-    //again connect
-    console.log('connect for ever')
-    WebSocketConnection()
-  }  
-}
-
- 
-bt.addEventListener("click",function(event){
-
-    message={
-      'my_profile_id':my_profile_id,
-      'msg':tx.value,
-      'otherid':Otherid
-    }
-    tx.value=""
-    ws.send(JSON.stringify(message))
-    
-})
-
-//Socket close
-let Socketdisconnect=function(){
-  console.log('close')
-  ws.close()
-}
-
-ws.onclose=function(event){
-  //again connect
-  console.log('1st connect')
-  WebSocketConnection()
-}   
-
-// Get all elements with class 'clickable-h1'
-const h1Elements = document.querySelectorAll('.clickable-h1');
-
-// Add click event listener to each h1 element
-h1Elements.forEach((h1) => {
-  h1.addEventListener('click', function() {
-    tx.removeAttribute('hidden')
-    bt.removeAttribute('hidden')
-    // Extract the id attribute of the clicked h1
-    const OtherProfileId = this.id;
-    Otherid=OtherProfileId
-    container.innerText=""
-    Socketdisconnect()
-    ChatGet(Otherid)
-    //console.log('Clicked h1 with id:', OtherProfileId);
-
-    // Your logic here based on the OtherProfileId
-  });
-});
-
-//User chat retrive
-
-let ChatGet=async function(Otherid)
-{
-  let response=await fetch(`messages/?other_id=${Otherid}`)
-  console.log(response)
-  let data=await response.json()
-  console.log("data type",typeof(data))
-  console.log(data,"gooo")
-  console.log(data["Chats"])
-  li=[]
-  for (let obj of data["Chats"]){
-    li.push(obj["fields"]["context"])
-  }
-  container.innerText=li
-}
-</script>
+  </body>
 </html>
-

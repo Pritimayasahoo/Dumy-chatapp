@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-5t^poi7-#!fe#s9i=a(-)%vrjj$=ajn1288+ur42b&%hb4sn2@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ['*']
 
 #AUTH_USER_MODEL = 'chatapp.CustomUser'
 # Application definition
@@ -111,7 +111,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'  # Set to your local time zone
 
 USE_I18N = True
 
