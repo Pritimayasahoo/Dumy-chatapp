@@ -1,5 +1,0 @@
-{
-  "build": [
-    {"cmd": "python manage.py collectstatic"}
-  ]
-}
