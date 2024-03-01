@@ -8,6 +8,7 @@ const container = document.getElementById("container")
 let Otherid = 0;
 let ws
 let profileImgSrc
+const active_status=document.getElementById("active-status")
 
 
 messageInput.addEventListener("keypress", function (event) {
@@ -85,75 +86,95 @@ let WebSocketConnection = function () {
     ws.onmessage = function (event) {
         data = JSON.parse(event.data)
         const formattedTime = getCurrentTime()
-        tx.focus()
-        if (data.otherid == my_profile_id) {
 
-            const messagediv = document.createElement('div');
-            const paragraph = document.createElement('p');
-            const span = document.createElement('span');
-            const incomingdiv = document.createElement('div');
-            const received_withd_msg = document.createElement('div');
-            const incoming_msg_img = document.createElement('div');
-            const imgElement = document.createElement("img");
-            imgElement.classList.add('incoming-img')
+        if (data.type==="status_message"){
+        
+                active_status.textContent=data.msg       
+        }
 
-            imgElement.src = profileImgSrc;
-
-            incoming_msg_img.classList.add('incoming_msg_img')
-            incomingdiv.classList.add('incoming_msg');
-            messagediv.classList.add('message');
-            messagediv.classList.add('received_msg')
-            span.classList.add('time_date');
-            received_withd_msg.classList.add('received_withd_msg')
-
-            incoming_msg_img.appendChild(imgElement)
-            imgElement.classList.add('incoming-img')
-
-            paragraph.textContent = data.msg;
-            span.textContent = `${formattedTime}    |    Today`;
-
-            received_withd_msg.appendChild(paragraph)
-            received_withd_msg.appendChild(span)
-
-
-            messagediv.appendChild(received_withd_msg)
-
-            incomingdiv.appendChild(incoming_msg_img)
-            incomingdiv.appendChild(messagediv)
-            msg_history.appendChild(incomingdiv)
+        else if (data.type==="offline_message"){
+            active_status.textContent = `Last seen:-${formattedTime} | Today `;
 
         }
 
-        else {
-
-            const messagediv = document.createElement('div');
-            const paragraph = document.createElement('p');
-            const span = document.createElement('span');
-            const outgoingdiv = document.createElement('div');
-
-            const msg_history = document.querySelector('.msg_history')
-
-            outgoingdiv.classList.add('outgoing_msg');
-            messagediv.classList.add('message');
-            messagediv.classList.add('sent_msg')
-            span.classList.add('time_date');
-
-
-            paragraph.textContent = data.msg;
-            span.textContent = `${formattedTime}    |    Today`;
-
-            messagediv.appendChild(paragraph)
-            messagediv.appendChild(span)
-
-            outgoingdiv.appendChild(messagediv)
-            msg_history.appendChild(outgoingdiv)
+        else if(data.type==="typing_message"){
+            if (data.otherid==my_profile_id){
+                active_status.textContent=data.msg 
+            }
         }
 
-        let isScrolledToBottom = msg_history.scrollHeight - msg_history.clientHeight <= msg_history.scrollTop + 110;
-        if (isScrolledToBottom) {
-            msg_history.scrollTop = msg_history.scrollHeight;
+        else{
+            const formattedTime = getCurrentTime()
+            tx.focus()
+            if (data.otherid == my_profile_id) {
 
-        }
+                const messagediv = document.createElement('div');
+                const paragraph = document.createElement('p');
+                const span = document.createElement('span');
+                const incomingdiv = document.createElement('div');
+                const received_withd_msg = document.createElement('div');
+                const incoming_msg_img = document.createElement('div');
+                const imgElement = document.createElement("img");
+                imgElement.classList.add('incoming-img')
+
+                imgElement.src = profileImgSrc;
+
+                incoming_msg_img.classList.add('incoming_msg_img')
+                incomingdiv.classList.add('incoming_msg');
+                messagediv.classList.add('message');
+                messagediv.classList.add('received_msg')
+                span.classList.add('time_date');
+                received_withd_msg.classList.add('received_withd_msg')
+
+                incoming_msg_img.appendChild(imgElement)
+                imgElement.classList.add('incoming-img')
+
+                paragraph.textContent = data.msg;
+                span.textContent = `${formattedTime}    |    Today`;
+
+                received_withd_msg.appendChild(paragraph)
+                received_withd_msg.appendChild(span)
+
+
+                messagediv.appendChild(received_withd_msg)
+
+                incomingdiv.appendChild(incoming_msg_img)
+                incomingdiv.appendChild(messagediv)
+                msg_history.appendChild(incomingdiv)
+
+            }
+
+            else {
+
+                const messagediv = document.createElement('div');
+                const paragraph = document.createElement('p');
+                const span = document.createElement('span');
+                const outgoingdiv = document.createElement('div');
+
+                const msg_history = document.querySelector('.msg_history')
+
+                outgoingdiv.classList.add('outgoing_msg');
+                messagediv.classList.add('message');
+                messagediv.classList.add('sent_msg')
+                span.classList.add('time_date');
+
+
+                paragraph.textContent = data.msg;
+                span.textContent = `${formattedTime}    |    Today`;
+
+                messagediv.appendChild(paragraph)
+                messagediv.appendChild(span)
+
+                outgoingdiv.appendChild(messagediv)
+                msg_history.appendChild(outgoingdiv)
+            }
+
+            let isScrolledToBottom = msg_history.scrollHeight - msg_history.clientHeight <= msg_history.scrollTop + 110;
+            if (isScrolledToBottom) {
+                msg_history.scrollTop = msg_history.scrollHeight;
+
+            }
+    }
 
     }
 
@@ -171,6 +192,7 @@ bt.addEventListener("click", function (event) {
         message = {
             'my_profile_id': my_profile_id,
             'msg': tx.value,
+            'type':'Normal_message',
             'otherid': Otherid
         }
         tx.value = ""
@@ -217,7 +239,23 @@ h1Elements.forEach((h1) => {
 let ChatGet = async function (Otherid, profileImgSrc) {
     let response = await fetch(`messages/?other_id=${Otherid}`)
     let data = await response.json()
+    if (data.status_type==="Last_seen")
+    {
 
+       const Last_seen=data.active_status
+       const dateFromDjango = new Date(Last_seen);
+        // Format the time
+        const formattedTime = formatTime(dateFromDjango);
+        // Format the date
+        const formattedDate = formatDate(dateFromDjango);
+        // Combine time and date
+        const finalDateTime = 'Last seen:-'+formattedTime + ' | ' + formattedDate;
+        active_status.textContent=finalDateTime
+
+    }
+    else{
+        active_status.textContent=data.active_status
+    }
     // Append new messages to the messages container
     data.Chats.forEach(chat => {
 
@@ -298,3 +336,73 @@ let ChatGet = async function (Otherid, profileImgSrc) {
 
 
 }
+
+
+
+window.addEventListener('unload',async function(event){
+    try {
+        const response = await fetch('/quite_status/');
+       
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+    } 
+    catch (error) {
+        console.error('Error updating user status:', error);
+    
+    }
+});
+
+
+let typingEnd=function () {
+    // Reset the typingStarted flag to false
+    typingStarted = false;
+    message = {
+        'my_profile_id': my_profile_id,
+        'msg': "Online",
+        'type':'typing_message',
+        'otherid': Otherid
+    }
+    ws.send(JSON.stringify(message))
+}
+
+
+
+// Define variables for typing detection
+let typingTimer; // Timer identifier
+let typingInterval = 1000; // Time in milliseconds (1 second)
+let typingStarted = false; // Flag to track if typing has started
+
+// Event handler for keydown event (start typing)
+tx.addEventListener('keydown', function(event) {
+    // If typing has not already started, set typingStarted flag to true
+    if (!typingStarted) {
+        typingStarted = true;
+        message = {
+            'my_profile_id': my_profile_id,
+            'msg': "typing...",
+            'type':'typing_message',
+            'otherid': Otherid
+        }
+        ws.send(JSON.stringify(message))
+    }
+
+    // Clear the typing timer
+    clearTimeout(typingTimer);
+
+    // Start a new typing timer
+    typingTimer = setTimeout(typingEnd, typingInterval);
+});
+
+// Event handler for keyup event (stop typing)
+tx.addEventListener('keyup', function(event) {
+    // Clear the typing timer when user stops typing
+    clearTimeout(typingTimer);
+    
+    // If typing has already started, start the typing timer again
+    if (typingStarted) {
+        typingTimer = setTimeout(typingEnd, typingInterval);
+    }
+});
+
