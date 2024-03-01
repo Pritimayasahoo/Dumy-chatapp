@@ -8,7 +8,7 @@ const container = document.getElementById("container")
 let Otherid = 0;
 let ws
 let profileImgSrc
-const active_status=document.getElementById("active-status")
+const active_status = document.getElementById("active-status")
 
 
 messageInput.addEventListener("keypress", function (event) {
@@ -87,23 +87,23 @@ let WebSocketConnection = function () {
         data = JSON.parse(event.data)
         const formattedTime = getCurrentTime()
 
-        if (data.type==="status_message"){
-        
-                active_status.textContent=data.msg       
+        if (data.type === "status_message") {
+
+            active_status.textContent = data.msg
         }
 
-        else if (data.type==="offline_message"){
+        else if (data.type === "offline_message") {
             active_status.textContent = `Last seen:-${formattedTime} | Today `;
 
         }
 
-        else if(data.type==="typing_message"){
-            if (data.otherid==my_profile_id){
-                active_status.textContent=data.msg 
+        else if (data.type === "typing_message") {
+            if (data.otherid == my_profile_id) {
+                active_status.textContent = data.msg
             }
         }
 
-        else{
+        else {
             const formattedTime = getCurrentTime()
             tx.focus()
             if (data.otherid == my_profile_id) {
@@ -174,7 +174,7 @@ let WebSocketConnection = function () {
                 msg_history.scrollTop = msg_history.scrollHeight;
 
             }
-    }
+        }
 
     }
 
@@ -192,7 +192,7 @@ bt.addEventListener("click", function (event) {
         message = {
             'my_profile_id': my_profile_id,
             'msg': tx.value,
-            'type':'Normal_message',
+            'type': 'Normal_message',
             'otherid': Otherid
         }
         tx.value = ""
@@ -239,22 +239,21 @@ h1Elements.forEach((h1) => {
 let ChatGet = async function (Otherid, profileImgSrc) {
     let response = await fetch(`messages/?other_id=${Otherid}`)
     let data = await response.json()
-    if (data.status_type==="Last_seen")
-    {
+    if (data.status_type === "Last_seen") {
 
-       const Last_seen=data.active_status
-       const dateFromDjango = new Date(Last_seen);
+        const Last_seen = data.active_status
+        const dateFromDjango = new Date(Last_seen);
         // Format the time
         const formattedTime = formatTime(dateFromDjango);
         // Format the date
         const formattedDate = formatDate(dateFromDjango);
         // Combine time and date
-        const finalDateTime = 'Last seen:-'+formattedTime + ' | ' + formattedDate;
-        active_status.textContent=finalDateTime
+        const finalDateTime = 'Last seen:-' + formattedTime + ' | ' + formattedDate;
+        active_status.textContent = finalDateTime
 
     }
-    else{
-        active_status.textContent=data.active_status
+    else {
+        active_status.textContent = data.active_status
     }
     // Append new messages to the messages container
     data.Chats.forEach(chat => {
@@ -339,29 +338,29 @@ let ChatGet = async function (Otherid, profileImgSrc) {
 
 
 
-window.addEventListener('unload',async function(event){
+window.addEventListener('unload', async function (event) {
     try {
         const response = await fetch('/quite_status/');
-       
+
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
 
-    } 
+    }
     catch (error) {
         console.error('Error updating user status:', error);
-    
+
     }
 });
 
 
-let typingEnd=function () {
+let typingEnd = function () {
     // Reset the typingStarted flag to false
     typingStarted = false;
     message = {
         'my_profile_id': my_profile_id,
         'msg': "Online",
-        'type':'typing_message',
+        'type': 'typing_message',
         'otherid': Otherid
     }
     ws.send(JSON.stringify(message))
@@ -375,14 +374,14 @@ let typingInterval = 1000; // Time in milliseconds (1 second)
 let typingStarted = false; // Flag to track if typing has started
 
 // Event handler for keydown event (start typing)
-tx.addEventListener('keydown', function(event) {
+tx.addEventListener('keydown', function (event) {
     // If typing has not already started, set typingStarted flag to true
     if (!typingStarted) {
         typingStarted = true;
         message = {
             'my_profile_id': my_profile_id,
             'msg': "typing...",
-            'type':'typing_message',
+            'type': 'typing_message',
             'otherid': Otherid
         }
         ws.send(JSON.stringify(message))
@@ -396,10 +395,10 @@ tx.addEventListener('keydown', function(event) {
 });
 
 // Event handler for keyup event (stop typing)
-tx.addEventListener('keyup', function(event) {
+tx.addEventListener('keyup', function (event) {
     // Clear the typing timer when user stops typing
     clearTimeout(typingTimer);
-    
+
     // If typing has already started, start the typing timer again
     if (typingStarted) {
         typingTimer = setTimeout(typingEnd, typingInterval);

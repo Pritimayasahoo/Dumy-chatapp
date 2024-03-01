@@ -45,8 +45,8 @@ class Myasyncconsumer(AsyncConsumer):
     async def websocket_receive(self, event):
 
         data = json.loads(event['text'])
-        
-        if data['type']=="Normal_message":
+
+        if data['type'] == "Normal_message":
             await database_sync_to_async(Chat.objects.create)(context=data['msg'], user=self.owner_profile, group=self.new_group)
 
         await self.channel_layer.group_send(self.group_name,
@@ -69,7 +69,7 @@ class Myasyncconsumer(AsyncConsumer):
     async def websocket_disconnect(self, event):
         try:
             await self.channel_layer.group_discard(self.group_name, self.channel_name)
-    
+
             raise StopConsumer()
         except:
             raise StopConsumer()

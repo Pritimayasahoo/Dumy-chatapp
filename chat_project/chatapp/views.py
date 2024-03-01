@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect,HttpResponse
+from django.shortcuts import render, redirect, HttpResponse
 from django.http import JsonResponse
 from django.contrib.auth.models import User
 from .models import Group, Chat, Profile
@@ -90,8 +90,8 @@ def UpdateProfile(request):
 def home(request):
 
     current_profile = Profile.objects.filter(user=request.user).first()
-    current_profile.online_status=True
-    current_profile.last_seen=None
+    current_profile.online_status = True
+    current_profile.last_seen = None
     current_profile.save()
     filtered_groups = Group.objects.filter(users=current_profile)
 
@@ -102,12 +102,11 @@ def home(request):
         'my_profile': current_profile,
     }
 
-
     message = {
         'msg': "Online",
         'type': "status_message"
     }
-   
+
     message_json = json.dumps(message)
     channel_layer = get_channel_layer()
     for group in filtered_groups:
@@ -118,7 +117,7 @@ def home(request):
                 'message': message_json
             }
         )
-    
+
     return render(request, 'home.html', context)
 
 
@@ -128,13 +127,13 @@ def GetMessage(request):
     Other_id = request.GET.get('other_id')
 
     Other_profile = Profile.objects.get(id=Other_id)
-    if Other_profile.online_status==True:
-        status="Online"
-        status_type="Online"
+    if Other_profile.online_status == True:
+        status = "Online"
+        status_type = "Online"
     else:
-        status=Other_profile.last_seen
-        status_type="Last_seen"
-           
+        status = Other_profile.last_seen
+        status_type = "Last_seen"
+
     Own_profile = Profile.objects.get(user=request.user)
 
     Recent_gp = Group.objects.filter(
@@ -147,23 +146,24 @@ def GetMessage(request):
 
     data = {
         'Chats': Chats,
-        'active_status':status,
-        'status_type':status_type
+        'active_status': status,
+        'status_type': status_type
 
     }
     return JsonResponse(data)
 
+
 def qt(request):
     current_profile = Profile.objects.filter(user=request.user).first()
-    current_profile.online_status=False
-    current_profile.last_seen=timezone.now()
+    current_profile.online_status = False
+    current_profile.last_seen = timezone.now()
     current_profile.save()
     filtered_groups = Group.objects.filter(users=current_profile)
     message = {
         'msg': str(current_profile.last_seen),
         'type': "status_message"
     }
-   
+
     message_json = json.dumps(message)
     channel_layer = get_channel_layer()
     for group in filtered_groups:
@@ -174,34 +174,37 @@ def qt(request):
                 'message': message_json
             }
         )
-       
-   
+
     return JsonResponse({'message': 'User status updated successfully'})
+
 
 async def quite(request):
     # Assuming you have some way to get the current user
     current_user = request.user
     # Call the heavy asynchronous function
-    
-    #asyncio.run(process_heavy_task(current_user))
+
+    # asyncio.run(process_heavy_task(current_user))
     asyncio.create_task(process_heavy_task(current_user))
     # Return the response immediately
     return JsonResponse({'message': 'Processing heavy task initiated'})
 
 
 async def process_heavy_task(user):
-    current_profile = await database_sync_to_async(Profile.objects.filter)(user=user)  # Await the ORM query
-    current_profile=await database_sync_to_async(current_profile.first)()
+    # Await the ORM query
+    current_profile = await database_sync_to_async(Profile.objects.filter)(user=user)
+    current_profile = await database_sync_to_async(current_profile.first)()
     current_profile.online_status = False
-    
+
     # Get the current time in the India time zone
     india_timezone = pytz.timezone('Asia/Kolkata')
     india_time = datetime.datetime.now(india_timezone)
     formatted_time = india_time.strftime('%Y-%m-%d %H:%M:')
-    
+
     current_profile.last_seen = timezone.now()
-    await database_sync_to_async(current_profile.save)()  # Await the save operation
-    filtered_groups = await database_sync_to_async(Group.objects.filter)(users=current_profile)  # Convert the synchronous ORM call to asynchronous
+    # Await the save operation
+    await database_sync_to_async(current_profile.save)()
+    # Convert the synchronous ORM call to asynchronous
+    filtered_groups = await database_sync_to_async(Group.objects.filter)(users=current_profile)
     message = {
         'msg': str(current_profile.last_seen),
         'type': "offline_message"
@@ -216,9 +219,3 @@ async def process_heavy_task(user):
                 'message': message_json
             }
         )
-  
-    
-
-    
-
-    
