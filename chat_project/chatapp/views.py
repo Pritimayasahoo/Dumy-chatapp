@@ -65,25 +65,30 @@ def loguser(request):
     return render(request, 'login.html')
 
 
-def UpdateProfile(request):
+@login_required(login_url='/loguser/')
+def create_profile(request):
+    return render(request, "profile.html")
+
+
+@login_required(login_url='/loguser/')
+def SaveProfile(request):
     if request.method == "POST":
 
         user = request.user
         profile = Profile.objects.get(user=user)
 
-        if request.FILES.get('profilepic'):
-            image = request.FILES.get('profilepic')
+        text_data = request.POST.get("text_data")
+        image_data = request.FILES.get("image_data")
+        
+        text_data=text_data if text_data else profile.name
 
-        else:
-            image = profile.profileimg
-        about = request.POST["about"]
+        profile.profileimg = image_data
+        profile.name = text_data
 
-        profile.profileimg = image
-        profile.about = about
         profile.save()
 
-        return redirect('/')
-    return render(request, 'profile.html')
+        return JsonResponse({"message": "Success done"})
+    return JsonResponse({'error': 'Something went wrong'}, status=401)
 
 
 @login_required(login_url='/loguser/')
@@ -151,31 +156,6 @@ def GetMessage(request):
 
     }
     return JsonResponse(data)
-
-
-def qt(request):
-    current_profile = Profile.objects.filter(user=request.user).first()
-    current_profile.online_status = False
-    current_profile.last_seen = timezone.now()
-    current_profile.save()
-    filtered_groups = Group.objects.filter(users=current_profile)
-    message = {
-        'msg': str(current_profile.last_seen),
-        'type': "status_message"
-    }
-
-    message_json = json.dumps(message)
-    channel_layer = get_channel_layer()
-    for group in filtered_groups:
-        async_to_sync(channel_layer.group_send)(
-            group.name,
-            {
-                'type': 'chat.message',
-                'message': message_json
-            }
-        )
-
-    return JsonResponse({'message': 'User status updated successfully'})
 
 
 async def quite(request):

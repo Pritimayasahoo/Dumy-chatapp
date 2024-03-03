@@ -11,7 +11,7 @@ class Profile(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, unique=True)
     createtime = models.DateTimeField(default=timezone.now)
     profileimg = models.ImageField(
-        upload_to='profilepic', default='default.jpg')
+    upload_to='profilepic', default='default.jpg')
     name = models.CharField(max_length=50)
     about = models.CharField(max_length=200, blank=True)
     mail = models.EmailField(unique=True)

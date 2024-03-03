@@ -337,8 +337,8 @@ let ChatGet = async function (Otherid, profileImgSrc) {
 }
 
 
-
 window.addEventListener('unload', async function (event) {
+
     try {
         const response = await fetch('/quite_status/');
 
@@ -351,7 +351,8 @@ window.addEventListener('unload', async function (event) {
         console.error('Error updating user status:', error);
 
     }
-});
+}
+);
 
 
 let typingEnd = function () {
